@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="main.css">
 </head>
 <body>
+  <!-- Contenedor para notificaciones flotantes -->
+  <div id="toast-container" class="toast-container"></div>
+
   <div id="app">
     <!-- Titlebar -->
     <div class="titlebar" id="titlebar">
@@ -20,10 +23,10 @@
           <span class="logo-text">SyncDL</span>
         </div>
         <nav class="titlebar-nav">
-          <button class="nav-tab active" data-page="download">Descargar</button>
-          <button class="nav-tab" data-page="sync">Sincronizar</button>
-          <button class="nav-tab" data-page="library">Biblioteca</button>
-          <button class="nav-tab" data-page="settings">Ajustes</button>
+          <button class="nav-tab active" data-page="download" aria-label="Ir a descargas">Descargar</button>
+          <button class="nav-tab" data-page="sync" aria-label="Ir a sincronización">Sincronizar</button>
+          <button class="nav-tab" data-page="library" aria-label="Ir a biblioteca">Biblioteca</button>
+          <button class="nav-tab" data-page="settings" aria-label="Ir a ajustes">Ajustes</button>
         </nav>
       </div>
       <div class="titlebar-controls">
@@ -198,7 +201,10 @@
                   <label>Subcarpeta en el dispositivo (opcional)</label>
                   <input type="text" id="sync-subfolder" placeholder="Music / MUSIC / MP3 (deja vacío para raíz)">
                 </div>
-                <button class="btn-primary" id="btn-sync-analyze" disabled>🔍 Analizar diferencias</button>
+                <button class="btn-primary" id="btn-sync-analyze" disabled>
+                  <span class="btn-icon">🔍</span>
+                  <span>Analizar diferencias</span>
+                </button>
               </div>
             </section>
 
@@ -211,7 +217,9 @@
                 <!-- Populated dynamically -->
               </div>
               <div class="sync-diff" id="sync-diff">
-                <!-- Populated dynamically -->
+                <div class="empty-state">
+                  <p>No se han encontrado diferencias entre la biblioteca y el dispositivo.</p>
+                </div>
               </div>
               <div class="sync-actions">
                 <button class="btn-green large" id="btn-sync-execute">
@@ -300,7 +308,12 @@
                 <button class="btn-secondary" id="btn-lib-path">Examinar</button>
               </div>
               <div id="lib-stats" class="lib-stats"></div>
-              <div id="lib-list" class="lib-list"></div>
+              <div id="lib-list" class="lib-list">
+                <div class="sidebar-item dimmed">
+                  <span class="src-icon">📂</span>
+                  <span>Escanea tu biblioteca para ver tus canciones...</span>
+                </div>
+              </div>
             </section>
           </div>
         </div>
