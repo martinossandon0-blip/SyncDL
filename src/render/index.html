@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyncDL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Titlebar -->
+    <div class="titlebar" id="titlebar">
+      <div class="titlebar-drag">
+        <div class="titlebar-logo">
+          <span class="logo-dot d1"></span>
+          <span class="logo-dot d2"></span>
+          <span class="logo-dot d3"></span>
+          <span class="logo-text">SyncDL</span>
+        </div>
+        <nav class="titlebar-nav">
+          <button class="nav-tab active" data-page="download">Descargar</button>
+          <button class="nav-tab" data-page="sync">Sincronizar</button>
+          <button class="nav-tab" data-page="library">Biblioteca</button>
+          <button class="nav-tab" data-page="settings">Ajustes</button>
+        </nav>
+      </div>
+      <div class="titlebar-controls">
+        <button class="win-btn" id="btn-minimize">─</button>
+        <button class="win-btn" id="btn-maximize">□</button>
+        <button class="win-btn close" id="btn-close">✕</button>
+      </div>
+    </div>
+
+    <!-- Main layout -->
+    <div class="layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <span class="sidebar-label">Fuentes</span>
+          <button class="sidebar-item active" data-source="apple_music">
+            <span class="src-icon am">♫</span>
+            <span>Apple Music</span>
+            <span class="src-badge connected" id="badge-am">●</span>
+          </button>
+          <button class="sidebar-item" data-source="spotify">
+            <span class="src-icon sp">◉</span>
+            <span>Spotify</span>
+            <span class="src-badge" id="badge-sp">○</span>
+          </button>
+          <button class="sidebar-item" data-source="ytmusic">
+            <span class="src-icon yt">▶</span>
+            <span>YouTube Music</span>
+            <span class="src-badge ready" id="badge-yt">●</span>
+          </button>
+          <button class="sidebar-item" data-source="youtube">
+            <span class="src-icon ytv">▶</span>
+            <span>YouTube</span>
+            <span class="src-badge ready" id="badge-ytv">●</span>
+          </button>
+        </div>
+
+        <div class="sidebar-section">
+          <span class="sidebar-label">Dispositivos</span>
+          <div id="devices-list">
+            <div class="sidebar-item dimmed">
+              <span class="src-icon">💾</span>
+              <span>Buscando...</span>
+            </div>
+          </div>
+          <button class="sidebar-item small" id="btn-refresh-devices">↺ Actualizar</button>
+        </div>
+
+        <div class="sidebar-bottom">
+          <div class="deps-status" id="deps-status">
+            <span class="deps-dot" id="dot-ytdlp">○</span> yt-dlp
+            <span class="deps-dot" id="dot-ffmpeg">○</span> ffmpeg
+            <span class="deps-dot" id="dot-gamdl">○</span> gamdl
+            <span class="deps-dot" id="dot-spotdl">○</span> spotdl
+          </div>
+        </div>
+      </aside>
+
+      <!-- Pages -->
+      <main class="content">
+        <!-- DOWNLOAD PAGE -->
+        <div class="page active" id="page-download">
+          <div class="page-inner">
+
+            <!-- URL Input -->
+            <section class="card url-card">
+              <div class="card-header">
+                <h2>Nueva descarga</h2>
+                <span class="card-hint">Pega un enlace de playlist, álbum o canción</span>
+              </div>
+              <div class="url-input-row">
+                <div class="url-input-wrap">
+                  <span class="url-icon">↗</span>
+                  <input type="text" id="url-input" placeholder="https://music.apple.com/... · https://open.spotify.com/... · https://youtube.com/..." spellcheck="false">
+                  <button class="url-clear" id="url-clear">✕</button>
+                </div>
+                <button class="btn-primary" id="btn-analyze">Analizar</button>
+              </div>
+              <div class="url-detected" id="url-detected" style="display:none">
+                <span class="detected-source" id="detected-source"></span>
+                <span class="detected-type" id="detected-type"></span>
+                <span class="detected-note" id="detected-note"></span>
+              </div>
+            </section>
+
+            <!-- Quality Selector (shown after analysis) -->
+            <section class="card quality-card" id="quality-card" style="display:none">
+              <div class="card-header">
+                <h2>Calidad de descarga</h2>
+                <span class="card-hint" id="quality-hint"></span>
+              </div>
+              <div class="quality-grid" id="quality-grid">
+                <!-- Populated dynamically -->
+              </div>
+              <div class="quality-options">
+                <label class="toggle-option">
+                  <input type="checkbox" id="opt-lrc" checked>
+                  <span class="toggle-label">Descargar .lrc (letras sincronizadas)</span>
+                </label>
+                <label class="toggle-option">
+                  <input type="checkbox" id="opt-metadata" checked>
+                  <span class="toggle-label">Incrustar metadata y portada</span>
+                </label>
+              </div>
+            </section>
+
+            <!-- Output path -->
+            <section class="card output-card" id="output-card" style="display:none">
+              <div class="card-header">
+                <h2>Destino</h2>
+              </div>
+              <div class="output-row">
+                <input type="text" id="output-path" readonly placeholder="Selecciona carpeta de destino...">
+                <button class="btn-secondary" id="btn-select-output">Examinar</button>
+                <button class="btn-secondary" id="btn-open-output" style="display:none">Abrir ↗</button>
+              </div>
+              <div class="output-actions">
+                <button class="btn-primary large" id="btn-start-download" disabled>
+                  <span class="btn-icon">↓</span> Iniciar descarga
+                </button>
+              </div>
+            </section>
+
+            <!-- Progress -->
+            <section class="card progress-card" id="progress-card" style="display:none">
+              <div class="card-header">
+                <h2>Descargando</h2>
+                <div class="progress-controls">
+                  <button class="btn-secondary small" id="btn-pause">⏸ Pausar</button>
+                  <button class="btn-danger small" id="btn-cancel">✕ Cancelar</button>
+                </div>
+              </div>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+                </div>
+                <span class="progress-label" id="progress-label">0%</span>
+              </div>
+              <div class="track-list" id="track-list">
+                <!-- Populated dynamically -->
+              </div>
+            </section>
+
+          </div>
+        </div>
+
+        <!-- SYNC PAGE -->
+        <div class="page" id="page-sync">
+          <div class="page-inner">
+            <section class="card">
+              <div class="card-header">
+                <h2>Sincronizar con dispositivo</h2>
+                <span class="card-hint">Compara tu biblioteca local con la tarjeta SD o MP3</span>
+              </div>
+
+              <div class="sync-config">
+                <div class="sync-row">
+                  <label>Biblioteca local (fuente)</label>
+                  <div class="output-row">
+                    <input type="text" id="sync-source" readonly placeholder="Carpeta con tus canciones descargadas...">
+                    <button class="btn-secondary" id="btn-sync-source">Examinar</button>
+                  </div>
+                </div>
+                <div class="sync-row">
+                  <label>Dispositivo / SD Card (destino)</label>
+                  <div class="output-row">
+                    <input type="text" id="sync-device" readonly placeholder="Selecciona unidad SD o carpeta del MP3...">
+                    <button class="btn-secondary" id="btn-sync-device">Examinar</button>
+                  </div>
+                </div>
+                <div class="sync-row">
+                  <label>Subcarpeta en el dispositivo (opcional)</label>
+                  <input type="text" id="sync-subfolder" placeholder="Music / MUSIC / MP3 (deja vacío para raíz)">
+                </div>
+                <button class="btn-primary" id="btn-sync-analyze" disabled>🔍 Analizar diferencias</button>
+              </div>
+            </section>
+
+            <!-- Sync diff results -->
+            <section class="card sync-results" id="sync-results" style="display:none">
+              <div class="card-header">
+                <h2>Resultado del análisis</h2>
+              </div>
+              <div class="sync-stats" id="sync-stats">
+                <!-- Populated dynamically -->
+              </div>
+              <div class="sync-diff" id="sync-diff">
+                <!-- Populated dynamically -->
+              </div>
+              <div class="sync-actions">
+                <button class="btn-green large" id="btn-sync-execute">
+                  <span>↗</span> Actualizar dispositivo
+                </button>
+                <button class="btn-secondary" id="btn-sync-reanalyze">↺ Re-analizar</button>
+              </div>
+            </section>
+
+            <!-- Sync progress -->
+            <section class="card" id="sync-progress-card" style="display:none">
+              <div class="card-header">
+                <h2>Copiando archivos...</h2>
+              </div>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill green" id="sync-fill" style="width:0%"></div>
+                </div>
+                <span class="progress-label" id="sync-label">0%</span>
+              </div>
+              <div id="sync-log" class="sync-log"></div>
+            </section>
+          </div>
+        </div>
+
+        <!-- SETTINGS PAGE -->
+        <div class="page" id="page-settings">
+          <div class="page-inner">
+
+            <section class="card">
+              <div class="card-header">
+                <h2>Apple Music</h2>
+                <span class="card-hint">Necesitas cuenta activa de Apple Music</span>
+              </div>
+              <div class="settings-group">
+                <label>Cookies (cookies.txt Netscape format)</label>
+                <div class="output-row">
+                  <input type="text" id="set-am-cookies" readonly placeholder="Ningún archivo seleccionado...">
+                  <button class="btn-secondary" id="btn-am-cookies">Seleccionar cookies.txt</button>
+                </div>
+                <label>Archivo Widevine (.wvd) — para ALAC</label>
+                <div class="output-row">
+                  <input type="text" id="set-wvd" readonly placeholder="device.wvd (generado con pywidevine desde tus claves)...">
+                  <button class="btn-secondary" id="btn-wvd">Seleccionar .wvd</button>
+                </div>
+                <div class="info-box">
+                  <p>💡 <strong>Tus archivos client_id.bin y private_key.pem</strong> son claves Widevine L3 de tu dispositivo. Para convertirlas a .wvd ejecuta:<br>
+                  <code>pip install pywidevine<br>pywidevine create-device -t ANDROID -l 3 -k private_key.pem -c client_id.bin -o device.wvd</code></p>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-header">
+                <h2>Carpeta de descarga por defecto</h2>
+              </div>
+              <div class="output-row">
+                <input type="text" id="set-default-output" readonly>
+                <button class="btn-secondary" id="btn-default-output">Cambiar</button>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-header">
+                <h2>Dependencias</h2>
+                <span class="card-hint">Herramientas necesarias para la descarga</span>
+              </div>
+              <div id="deps-list">
+                <!-- Populated dynamically -->
+              </div>
+            </section>
+
+          </div>
+        </div>
+
+        <!-- LIBRARY PAGE -->
+        <div class="page" id="page-library">
+          <div class="page-inner">
+            <section class="card">
+              <div class="card-header">
+                <h2>Biblioteca local</h2>
+                <button class="btn-secondary small" id="btn-scan-library">↺ Escanear</button>
+              </div>
+              <div class="output-row">
+                <input type="text" id="lib-path" readonly placeholder="Selecciona carpeta de música...">
+                <button class="btn-secondary" id="btn-lib-path">Examinar</button>
+              </div>
+              <div id="lib-stats" class="lib-stats"></div>
+              <div id="lib-list" class="lib-list"></div>
+            </section>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

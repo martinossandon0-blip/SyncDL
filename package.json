@@ -1,0 +1,41 @@
+{
+  "name": "syncdl",
+  "version": "1.0.0",
+  "description": "Music downloader and SD sync - Apple Music, Spotify, YouTube",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder build --win",
+    "install-deps": "node scripts/install-deps.js"
+  },
+  "dependencies": {
+    "axios": "^1.15.1",
+    "chokidar": "^3.6.0",
+    "electron-store": "^8.2.0",
+    "fs-extra": "^11.3.4",
+    "music-metadata": "^7.14.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.syncdl.app",
+    "productName": "SyncDL",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "scripts/**/*",
+      "package.json"
+    ]
+  }
+}
